@@ -526,22 +526,6 @@ sudo docker volume inspect <name>
 sudo docker volume rm <name>
 ```
 
----
-
-## 11. Troubleshooting
-
-| Symptom | Likely Cause | Fix |
-|---------|--------------|-----|
-| `sudo: 'history': command not found` | Running `history` through `sudo` | Run `history` directly (no sudo) |
-| `sudo docker <cmd> → permission denied` | User not in `docker` group | `sudo usermod -aG docker $USER` then re-login |
-| Container exits immediately | Bad CMD or missing dependency | `sudo docker logs <name>` to inspect |
-| `docker: command not found` | PATH issue after install | `sudo systemctl restart docker` and reopen shell |
-| `curl http://collector-service:6000/...` fails from dashboard-service | Containers not on same network | Re-run with `--network monitor-net` on both |
-| Volume data disappears on container recreate | Used bind-mount path instead of named volume | Always use `-v <volume_name>:<container_path>` |
-| `nginx -t` reports syntax error | Bad `nginx.conf` copy | Re-check `dashboard/nginx.conf`, then `sudo docker restart dashboard-build` |
-
----
-
 ## Appendix A — Cleanup (Tear Down)
 
 ```bash
