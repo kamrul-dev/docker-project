@@ -1,6 +1,27 @@
 # Docker Metrics Monitoring Dashboard 
 A complete professional guide for deploying a two-container metrics dashboard application (Python collector + Nginx dashboard) on an Ubuntu server using Docker.
 
+
+## Installation guide
+
+* Make sure you have `docker` and `docker compose` installed in your system and your user is under `docker` group
+
+```bash 
+git clone https://github.com/kamrul-dev/docker-project
+
+cd docker-project/
+
+sudo docker compose up -d
+
+# Verify the UI 
+sudo curl http://<server-ip>:9090/
+
+# Verify the metrics status working from dashboard service to collector service
+sudo docker compose exec dashboard-service \
+  curl http://collector-service:6000/status
+
+```
+
 ---
 
 ## Table of Contents
