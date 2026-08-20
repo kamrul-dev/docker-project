@@ -13,7 +13,7 @@ A complete professional guide for deploying a two-container metrics dashboard ap
 | 1.2 | &nbsp;&nbsp;&nbsp;Phase 2 — Docker Compose Installation | Standalone `docker-compose` v1.29.2 binary |
 | 1.3 | &nbsp;&nbsp;&nbsp;Phase 3 — Project Structure | Source layout (collector/, dashboard/) |
 | 2  | **[TASK 2 — Docker Basics, Image Management, Networking & Storage](#task-2--docker-basics-image-management-networking--storage)** | Build images via `docker commit`, create network + volume, run containers |
-| 2.1 | &nbsp;&nbsp;&nbsp;Phase 4 — Build the Collector Service | Pull python:3.11-slim, install deps, commit |
+| 2.1 | &nbsp;&nbsp;&nbsp;Phase 4 — Build the Collector Service | Pull python:3.12-slim, install deps, commit |
 | 2.2 | &nbsp;&nbsp;&nbsp;Phase 5 — Create Network & Volume | `monitor-net` bridge + `metrics_data` volume |
 | 2.3 | &nbsp;&nbsp;&nbsp;Phase 6 — Run the Collector Container | `docker run` with volume + network |
 | 2.4 | &nbsp;&nbsp;&nbsp;Phase 7 — Build the Dashboard Service | Nginx image + custom `index.html` and `nginx.conf` |
@@ -193,12 +193,12 @@ sudo groups poridhian
 
 ## Phase 4 — Build the Collector Service
 
-The collector is a Python 3.11 application that exposes a metrics API on port 6000.
+The collector is a Python 3.12 application that exposes a metrics API on port 6000.
 
 ### 4.1 Pull the base image
 
 ```bash
-sudo docker pull python:3.11-slim
+sudo docker pull python:3.12-slim
 ```
 
 ### 4.2 Start a temporary build container
@@ -206,7 +206,7 @@ sudo docker pull python:3.11-slim
 ```bash
 sudo docker run -dit \
   --name collector-build \
-  python:3.11-slim \
+  python:3.12-slim \
   bash
 ```
 
@@ -563,7 +563,7 @@ sudo docker volume rm metrics_data
 ```
 Host (Ubuntu)
   ├── monitor-net  (custom bridge)
-  │     ├── collector-service  (collector:1.0.0 ← python:3.11-slim + /app)  → listens on :6000
+  │     ├── collector-service  (collector:1.0.0 ← python:3.12-slim + /app)  → listens on :6000
   │     └── dashboard-service  (dashboard:1.0.0 ← nginx:latest + custom UI/conf)  → listens on :80
   ├── metrics_data (named volume)  → mounted at /data in collector
   └── Port mapping: 9090 → dashboard:80
