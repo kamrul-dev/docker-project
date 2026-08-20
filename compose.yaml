@@ -1,0 +1,42 @@
+# Compose orchestration for the devops monitoring application.
+#
+# Two services share a custom bridge network (monitor-net) and the collector
+# persists its snapshot history to a named volume (metrics_data).
+#
+# Communication:
+#   Browser -> host:9090 -> dashboard-service:80 -> proxy -> collector-service:6000
+#
+#   The dashboard-service reverse-proxies /api/* to "http://collector-service:6000/*"
+#   using the service name "collector-service" as the Docker-internal DNS host.
+
+services:
+  dashboard-service:
+    build: ./dashboard
+    image: dashboard:1.0.0
+    container_name: dashboard-service
+    ports:
+      - "9090:80"
+    networks:
+      - monitor-net
+    depends_on:
+      - collector-service
+    restart: unless-stopped
+
+  collector-service:
+    build: ./collector
+    image: collector:1.0.0
+    container_name: collector-service
+    expose:
+      - "6000"
+    volumes:
+      - metrics_data:/data
+    networks:
+      - monitor-net
+    restart: unless-stopped
+
+networks:
+  monitor-net:
+    driver: bridge
+
+volumes:
+  metrics_data:

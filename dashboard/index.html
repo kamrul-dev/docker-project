@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monitoring Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+            padding: 32px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 8px; }
+        .subtitle { opacity: 0.8; font-size: 1rem; }
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+        button {
+            background: #2a5298;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+        button:hover { background: #1e3c72; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: "SF Mono", "Cascadia Code", Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 480px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .metric {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric .label { font-size: 0.8rem; opacity: 0.7; text-transform: uppercase; }
+        .metric .value { font-size: 1.6rem; font-weight: 600; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Metrics Monitoring Dashboard</h1>
+        <p class="subtitle">Real-time system metrics from the collector service</p>
+    </header>
+
+    <div class="card">
+        <div class="controls">
+            <button id="refresh-btn">Refresh</button>
+            <span class="status" id="status">Idle</span>
+        </div>
+        <div class="grid" id="metrics-grid">
+            <div class="metric"><div class="label">CPU</div><div class="value" id="cpu">—</div></div>
+            <div class="metric"><div class="label">Memory</div><div class="value" id="mem">—</div></div>
+            <div class="metric"><div class="label">Disk</div><div class="value" id="disk">—</div></div>
+            <div class="metric"><div class="label">Uptime</div><div class="value" id="uptime">—</div></div>
+        </div>
+        <pre id="raw">Click "Refresh" to fetch metrics from the collector.</pre>
+    </div>
+
+    <script>
+        const statusEl = document.getElementById("status");
+        const rawEl = document.getElementById("raw");
+        const btn = document.getElementById("refresh-btn");
+
+        async function loadMetrics() {
+            btn.disabled = true;
+            statusEl.textContent = "Loading...";
+            try {
+                const res = await fetch("/api/status", { cache: "no-store" });
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                const data = await res.json();
+                render(data);
+                statusEl.textContent = "Last updated: " + new Date().toLocaleTimeString();
+            } catch (err) {
+                statusEl.textContent = "Error: " + err.message;
+                rawEl.textContent = "Failed to reach the collector service.\n\n" + err.message;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function render(d) {
+            document.getElementById("cpu").textContent = (d.cpu_percent ?? "—") + "%";
+            document.getElementById("mem").textContent = (d.memory_percent ?? "—") + "%";
+            document.getElementById("disk").textContent = (d.disk_percent ?? "—") + "%";
+            document.getElementById("uptime").textContent = (d.uptime_seconds ?? "—") + "s";
+            rawEl.textContent = JSON.stringify(d, null, 2);
+        }
+
+        btn.addEventListener("click", loadMetrics);
+        loadMetrics();
+        setInterval(loadMetrics, 10000);
+    </script>
+</body>
+</html>
