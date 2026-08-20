@@ -1,4 +1,7 @@
 # Metrics Collector image: Python + Flask on port 6000.
+
+# If you want to build the image from a pre-built own collector:1.0.0 image, uncomment the following line and comment out the next line.
+# FROM collector:1.0.0
 FROM python:3.12-slim
 
 WORKDIR /app
